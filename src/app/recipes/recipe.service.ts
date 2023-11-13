@@ -1,12 +1,12 @@
 import { EventEmitter, Injectable } from "@angular/core";
+import { Subject } from "rxjs";
 import { Recipe } from "./recipe.model";
 import { Ingredient } from "../shared/ingredient.model";
 import { ShoppingListService } from "../shopping-list/shopping-list.service";
 
 @Injectable({providedIn: "root"})
 export class RecipeService{
-
-  recipeSelected =  new EventEmitter<Recipe>();
+  recipesChanged = new Subject<Recipe[]>();
 
  private  recipes: Recipe[] = [
     new Recipe('Ven Pongal Recipe', 'A Savor of Tradition, a Taste of Tamil Nadu!',
@@ -33,12 +33,31 @@ export class RecipeService{
 
    constructor(private slService: ShoppingListService){}
 
-   getRecipes(){
+   getRecipes(): Recipe[]{
     return this.recipes.slice();
    }
 
-   addIngredientsToShoppingList(ingredients: Ingredient[]){
+   getRecipe(index : number): Recipe{
+      return this.recipes[index];
+   }
+
+   addIngredientsToShoppingList(ingredients: Ingredient[]): void{
     this.slService.addIngredients(ingredients);
+   }
+
+   addRecipe(recipe: Recipe): void {
+    this.recipes.push(recipe);
+    this.recipesChanged.next(this.recipes.slice());
+   }
+
+   updateRecipe(index : number, newRecipe: Recipe) : void {
+    this.recipes[index] = newRecipe;
+    this.recipesChanged.next(this.recipes.slice());
+   }
+
+   deleteRecipe(index: number){
+    this.recipes.splice(index,1);
+    this.recipesChanged.next(this.recipes.slice());
    }
 
 }
